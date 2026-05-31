@@ -29,28 +29,28 @@
 
 ```text
 .
-├── READ.md                 # 课程设计文档
-├── README.md               # GitHub 项目说明
-└── MailClient/
-    ├── Contracts/          # 统一接口定义
-    ├── Data/               # SQLite 数据库表结构和数据库访问实现
-    ├── Models/             # 账号、邮件、日志、协议结果等数据模型
-    ├── Networking/         # 底层 Socket 通信封装
-    ├── Protocols/          # SMTP 和 POP3 协议客户端
-    ├── Services/           # 邮件解析、日志等通用服务
-    ├── UI/                 # WinForms 界面
-    ├── FRAMEWORK.md        # 系统框架和协作说明
-    ├── MailClient.csproj   # C# 项目文件
-    └── NuGet.Config        # 本地 NuGet 配置
+├── Contracts/          # 统一接口定义
+├── Data/               # SQLite 数据库表结构和数据库访问实现
+├── Models/             # 账号、邮件、日志、协议结果等数据模型
+├── Networking/         # 底层 Socket 通信封装
+├── Protocols/          # SMTP 和 POP3 协议客户端
+├── Services/           # 邮件解析、日志等通用服务
+├── UI/                 # WinForms 界面
+├── docs/               # 课程设计文档
+├── FRAMEWORK.md        # 系统框架和协作说明
+├── MailClient.csproj   # C# 项目文件
+├── NuGet.Config        # 本地 NuGet 配置
+├── Program.cs          # 程序入口
+└── README.md           # GitHub 项目说明
 ```
 
 ## 核心模块
 
 ### UI 界面层
 
-位于 `MailClient/UI`，负责 WinForms 主界面和用户交互。界面层只调用 `Contracts` 中定义的接口，不直接编写 SMTP/POP3 协议命令。
+位于 `UI/`，负责 WinForms 主界面和用户交互。界面层只调用 `Contracts/` 中定义的接口，不直接编写 SMTP/POP3 协议命令。
 
-当前主界面包含：
+当前主界面包括：
 
 - 账号配置区
 - 写邮件标签页
@@ -60,34 +60,34 @@
 
 ### 协议层
 
-位于 `MailClient/Protocols`，负责 SMTP 和 POP3 协议命令流程。
+位于 `Protocols/`，负责 SMTP 和 POP3 协议命令流程。
 
 - `SmtpClientSocket`：SMTP 邮件发送客户端。
 - `Pop3ClientSocket`：POP3 邮件接收、阅读、删除客户端。
 
 ### 网络通信层
 
-位于 `MailClient/Networking`。
+位于 `Networking/`。
 
 - `SocketConnection`：封装 TCP 连接、发送一行命令、读取单行响应、读取多行响应等基础操作。
 
 ### 数据库层
 
-位于 `MailClient/Data`。
+位于 `Data/`。
 
 - `DatabaseSchema`：统一维护 SQLite 建表脚本。
 - `SqliteDatabaseManager`：数据库访问实现，目前为占位实现，后续接入 SQLite 驱动后补全。
 
 ### 服务层
 
-位于 `MailClient/Services`。
+位于 `Services/`。
 
 - `MailParser`：负责构造 SMTP 邮件内容、解析 POP3 原始邮件内容。
 - `LogManager`：负责统一日志记录和界面通知。
 
 ## 主要接口
 
-接口统一放在 `MailClient/Contracts`，后续开发应优先遵守这些接口。
+接口统一放在 `Contracts/`，后续开发应优先遵守这些接口。
 
 ```text
 ISmtpClientSocket     SMTP 邮件发送接口
@@ -109,29 +109,30 @@ cd "C:\Users\Sherry Peng\OneDrive\桌面\Computer-Network Practice"
 
 ```powershell
 $env:NUGET_SCRATCH = Join-Path (Get-Location) ".nuget-scratch"
-dotnet restore MailClient\MailClient.csproj --configfile MailClient\NuGet.Config
+dotnet restore MailClient.csproj --configfile NuGet.Config
 ```
 
 编译项目：
 
 ```powershell
 $env:NUGET_SCRATCH = Join-Path (Get-Location) ".nuget-scratch"
-dotnet build MailClient\MailClient.csproj --configfile MailClient\NuGet.Config
+dotnet build MailClient.csproj --configfile NuGet.Config
 ```
 
 运行项目：
 
 ```powershell
-dotnet run --project MailClient\MailClient.csproj --configfile MailClient\NuGet.Config
+$env:NUGET_SCRATCH = Join-Path (Get-Location) ".nuget-scratch"
+dotnet run --project MailClient.csproj --configfile NuGet.Config
 ```
 
 生成文件位置：
 
 ```text
-MailClient\bin\Debug\net8.0-windows\
+bin\Debug\net8.0-windows\
 ```
 
-说明：当前命令中设置 `NUGET_SCRATCH` 是为了避免部分 Windows 环境下 NuGet 临时锁文件导致 restore/build 失败。
+说明：当前命令中设置 `NUGET_SCRATCH` 是为了避免部分 Windows 环境中 NuGet 临时锁文件导致 restore/build 失败。
 
 ## 当前进度
 
@@ -153,14 +154,13 @@ MailClient\bin\Debug\net8.0-windows\
 
 ## 协作约定
 
-1. UI 层只调用 `Contracts` 接口，不直接操作 Socket。
-2. SMTP/POP3 协议代码只放在 `Protocols` 和 `Networking`。
+1. UI 层只调用 `Contracts/` 接口，不直接操作 Socket。
+2. SMTP/POP3 协议代码只放在 `Protocols/` 和 `Networking/`。
 3. 数据库相关代码只通过 `IDatabaseManager` 访问。
 4. 邮件内容构造和解析统一走 `IMailParser`。
 5. 协议交互日志统一走 `ILogManager`。
 6. 日志中不得输出明文密码或授权码。
 7. 新增功能前先确认属于哪个模块，避免跨层耦合。
-
 
 ## 注意事项
 

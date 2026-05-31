@@ -94,7 +94,7 @@ Error()
 - 已创建可运行 WinForms 主窗口。
 - 已建立账号配置区和四个标签页：写邮件、收件箱、已发送、日志。
 - 已定义 SMTP、POP3、数据库、日志、邮件解析等协作接口。
-- 已提供 SocketConnection 底层收发封装。
+- 已提供 `SocketConnection` 底层收发封装。
 - SMTP/POP3/SQLite 目前是占位实现，等待后续按接口补全。
 
 ## 协作规则
