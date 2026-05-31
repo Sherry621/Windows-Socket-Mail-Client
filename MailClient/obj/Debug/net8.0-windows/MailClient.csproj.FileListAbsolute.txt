@@ -1,0 +1,14 @@
+C:\Users\Sherry Peng\OneDrive\桌面\Computer-Network Practice\MailClient\bin\Debug\net8.0-windows\MailClient.exe
+C:\Users\Sherry Peng\OneDrive\桌面\Computer-Network Practice\MailClient\bin\Debug\net8.0-windows\MailClient.deps.json
+C:\Users\Sherry Peng\OneDrive\桌面\Computer-Network Practice\MailClient\bin\Debug\net8.0-windows\MailClient.runtimeconfig.json
+C:\Users\Sherry Peng\OneDrive\桌面\Computer-Network Practice\MailClient\bin\Debug\net8.0-windows\MailClient.dll
+C:\Users\Sherry Peng\OneDrive\桌面\Computer-Network Practice\MailClient\bin\Debug\net8.0-windows\MailClient.pdb
+C:\Users\Sherry Peng\OneDrive\桌面\Computer-Network Practice\MailClient\obj\Debug\net8.0-windows\MailClient.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Sherry Peng\OneDrive\桌面\Computer-Network Practice\MailClient\obj\Debug\net8.0-windows\MailClient.AssemblyInfoInputs.cache
+C:\Users\Sherry Peng\OneDrive\桌面\Computer-Network Practice\MailClient\obj\Debug\net8.0-windows\MailClient.AssemblyInfo.cs
+C:\Users\Sherry Peng\OneDrive\桌面\Computer-Network Practice\MailClient\obj\Debug\net8.0-windows\MailClient.csproj.CoreCompileInputs.cache
+C:\Users\Sherry Peng\OneDrive\桌面\Computer-Network Practice\MailClient\obj\Debug\net8.0-windows\MailClient.dll
+C:\Users\Sherry Peng\OneDrive\桌面\Computer-Network Practice\MailClient\obj\Debug\net8.0-windows\refint\MailClient.dll
+C:\Users\Sherry Peng\OneDrive\桌面\Computer-Network Practice\MailClient\obj\Debug\net8.0-windows\MailClient.pdb
+C:\Users\Sherry Peng\OneDrive\桌面\Computer-Network Practice\MailClient\obj\Debug\net8.0-windows\MailClient.genruntimeconfig.cache
+C:\Users\Sherry Peng\OneDrive\桌面\Computer-Network Practice\MailClient\obj\Debug\net8.0-windows\ref\MailClient.dll
