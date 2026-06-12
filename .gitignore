@@ -1,5 +1,6 @@
 bin/
 obj/
+build-check/
 .nuget-scratch/
 *.user
 *.suo
