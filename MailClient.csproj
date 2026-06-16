@@ -8,4 +8,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Tools\**\*.cs" />
+    <Compile Remove="artifacts\**\*.cs" />
+    <EmbeddedResource Remove="Tools\**" />
+    <EmbeddedResource Remove="artifacts\**" />
+    <None Remove="Tools\**" />
+    <None Remove="artifacts\**" />
+  </ItemGroup>
+
 </Project>

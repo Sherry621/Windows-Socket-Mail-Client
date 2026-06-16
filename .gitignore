@@ -2,6 +2,7 @@ bin/
 obj/
 build-check/
 .nuget-scratch/
+artifacts/
 *.user
 *.suo
 .vs/
