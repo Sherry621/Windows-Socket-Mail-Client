@@ -25,6 +25,7 @@ public sealed class MainForm : Form
     private readonly ISmtpClientSocket smtpClient;
     private readonly IPop3ClientSocket pop3Client;
 
+    private readonly ComboBox mailProviderComboBox = new();
     private readonly TextBox emailTextBox = new();
     private readonly TextBox authCodeTextBox = new();
     private readonly TextBox smtpServerTextBox = new();
@@ -46,6 +47,7 @@ public sealed class MainForm : Form
     private readonly DataGridView sentGrid = new();
     private readonly TextBox logTextBox = new();
     private readonly ToolStripStatusLabel statusLabel = new("就绪");
+    private readonly List<Button> operationButtons = [];
 
     private readonly BindingSource inboxBindingSource = new();
     private readonly BindingSource sentBindingSource = new();
@@ -67,7 +69,8 @@ public sealed class MainForm : Form
     {
         Text = "基于 Socket 的邮件客户端";
         StartPosition = FormStartPosition.CenterScreen;
-        MinimumSize = new Size(1180, 820);
+        Size = new Size(1220, 940);
+        MinimumSize = new Size(1180, 900);
         Font = new Font("Microsoft YaHei UI", 9F);
         BackColor = AppBackground;
 
@@ -79,8 +82,8 @@ public sealed class MainForm : Form
             Padding = new Padding(14),
             BackColor = AppBackground
         };
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 112));
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 162));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 150));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 220));
         root.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
 
@@ -97,7 +100,7 @@ public sealed class MainForm : Form
         {
             Dock = DockStyle.Fill,
             BackColor = HeaderBackground,
-            Padding = new Padding(20, 14, 20, 14),
+            Padding = new Padding(24, 18, 24, 18),
             Margin = new Padding(0, 0, 0, 12)
         };
         panel.Paint += (_, e) =>
@@ -127,35 +130,38 @@ public sealed class MainForm : Form
             RowCount = 3,
             BackColor = Color.Transparent
         };
+        textLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
         textLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
-        textLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 24));
         textLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
         Label title = new()
         {
             Text = "Windows Socket Mail Client",
             ForeColor = Color.White,
-            Font = new Font("Microsoft YaHei UI", 17F, FontStyle.Bold),
+            Font = new Font("Microsoft YaHei UI", 18F, FontStyle.Bold),
             Dock = DockStyle.Fill,
-            TextAlign = ContentAlignment.MiddleLeft
+            TextAlign = ContentAlignment.MiddleLeft,
+            AutoEllipsis = true
         };
 
         Label subtitle = new()
         {
             Text = "SMTP / POP3 协议实验客户端 · WinForms 界面模块",
             ForeColor = Color.FromArgb(203, 213, 225),
-            Font = new Font("Microsoft YaHei UI", 9.5F),
+            Font = new Font("Microsoft YaHei UI", 10.5F, FontStyle.Regular),
             Dock = DockStyle.Fill,
-            TextAlign = ContentAlignment.MiddleLeft
+            TextAlign = ContentAlignment.MiddleLeft,
+            AutoEllipsis = true
         };
 
         Label caption = new()
         {
             Text = "Socket command logs, account configuration and mail operations are organized in one desktop workspace.",
             ForeColor = Color.FromArgb(148, 163, 184),
-            Font = new Font("Segoe UI", 8.5F),
+            Font = new Font("Segoe UI", 9F),
             Dock = DockStyle.Fill,
-            TextAlign = ContentAlignment.MiddleLeft
+            TextAlign = ContentAlignment.TopLeft,
+            AutoEllipsis = true
         };
 
         textLayout.Controls.Add(title, 0, 0);
@@ -168,7 +174,7 @@ public sealed class MainForm : Form
             FlowDirection = FlowDirection.RightToLeft,
             WrapContents = true,
             BackColor = Color.Transparent,
-            Padding = new Padding(0, 12, 0, 0)
+            Padding = new Padding(0, 28, 0, 0)
         };
         chips.Controls.Add(CreateHeaderChip("SQLite"));
         chips.Controls.Add(CreateHeaderChip("Socket"));
@@ -189,29 +195,40 @@ public sealed class MainForm : Form
         {
             Dock = DockStyle.Fill,
             ColumnCount = 6,
-            RowCount = 3,
+            RowCount = 4,
             Padding = new Padding(16, 12, 16, 10),
             BackColor = Surface
         };
 
-        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 92));
-        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
-        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 92));
-        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
-        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 92));
-        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 34));
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 38));
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 38));
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 38));
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 38));
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 116));
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 32));
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 116));
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 32));
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 116));
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 36));
 
-        AddLabel(layout, "邮箱", 0, 0);
+        AddLabel(layout, "邮箱类型", 0, 0);
+        ConfigureProviderComboBox();
+        layout.Controls.Add(mailProviderComboBox, 1, 0);
+
+        AddLabel(layout, "邮箱", 2, 0);
         StyleTextBox(emailTextBox);
-        layout.Controls.Add(emailTextBox, 1, 0);
+        emailTextBox.PlaceholderText = "例如：example@qq.com";
+        layout.Controls.Add(emailTextBox, 3, 0);
 
-        AddLabel(layout, "授权码", 2, 0);
+        AddLabel(layout, "授权码", 4, 0);
         StyleTextBox(authCodeTextBox);
         authCodeTextBox.UseSystemPasswordChar = true;
-        layout.Controls.Add(authCodeTextBox, 3, 0);
+        authCodeTextBox.PlaceholderText = "邮箱授权码或密码";
+        layout.Controls.Add(authCodeTextBox, 5, 0);
 
         AddLabel(layout, "SMTP服务器", 0, 1);
         StyleTextBox(smtpServerTextBox);
+        smtpServerTextBox.PlaceholderText = "例如：smtp.qq.com";
         layout.Controls.Add(smtpServerTextBox, 1, 1);
 
         AddLabel(layout, "SMTP端口", 2, 1);
@@ -220,6 +237,7 @@ public sealed class MainForm : Form
 
         AddLabel(layout, "POP3服务器", 0, 2);
         StyleTextBox(pop3ServerTextBox);
+        pop3ServerTextBox.PlaceholderText = "例如：pop.qq.com";
         layout.Controls.Add(pop3ServerTextBox, 1, 2);
 
         AddLabel(layout, "POP3端口", 2, 2);
@@ -234,11 +252,11 @@ public sealed class MainForm : Form
             BackColor = Surface
         };
 
-        buttons.Controls.Add(CreateButton("保存配置", OnSaveConfigClicked, 96));
-        buttons.Controls.Add(CreateButton("测试SMTP", OnTestSmtpClicked, 96));
-        buttons.Controls.Add(CreateButton("测试POP3", OnTestPop3Clicked, 96));
-        layout.Controls.Add(buttons, 4, 1);
-        layout.SetColumnSpan(buttons, 2);
+        buttons.Controls.Add(RegisterOperationButton(CreateButton("保存配置", OnSaveConfigClicked, 96)));
+        buttons.Controls.Add(RegisterOperationButton(CreateButton("测试SMTP", OnTestSmtpClicked, 96)));
+        buttons.Controls.Add(RegisterOperationButton(CreateButton("测试POP3", OnTestPop3Clicked, 96)));
+        layout.Controls.Add(buttons, 1, 3);
+        layout.SetColumnSpan(buttons, 5);
 
         group.Controls.Add(layout);
         return group;
@@ -281,10 +299,12 @@ public sealed class MainForm : Form
 
         AddLabel(layout, "收件人", 0, 0);
         StyleTextBox(receiverTextBox);
+        receiverTextBox.PlaceholderText = "例如：receiver@example.com";
         layout.Controls.Add(receiverTextBox, 1, 0);
 
         AddLabel(layout, "主题", 0, 1);
         StyleTextBox(subjectTextBox);
+        subjectTextBox.PlaceholderText = "请输入邮件主题";
         layout.Controls.Add(subjectTextBox, 1, 1);
 
         AddLabel(layout, "正文", 0, 2);
@@ -292,10 +312,11 @@ public sealed class MainForm : Form
         bodyTextBox.Multiline = true;
         bodyTextBox.ScrollBars = ScrollBars.Vertical;
         bodyTextBox.Font = new Font("Microsoft YaHei UI", 10F);
+        bodyTextBox.PlaceholderText = "请输入邮件正文";
         layout.Controls.Add(bodyTextBox, 1, 2);
 
         FlowLayoutPanel buttons = CreateButtonRow();
-        buttons.Controls.Add(CreateButton("发送", OnSendMailClicked, 90));
+        buttons.Controls.Add(RegisterOperationButton(CreateButton("发送", OnSendMailClicked, 90)));
         buttons.Controls.Add(CreateSecondaryButton("清空", OnClearComposeClicked, 90));
         layout.Controls.Add(buttons, 1, 3);
 
@@ -320,9 +341,9 @@ public sealed class MainForm : Form
         layout.RowStyles.Add(new RowStyle(SizeType.Percent, 52));
 
         FlowLayoutPanel buttons = CreateButtonRow();
-        buttons.Controls.Add(CreateButton("刷新收件箱", OnRefreshInboxClicked, 112));
-        buttons.Controls.Add(CreateSecondaryButton("阅读", OnReadMailClicked, 90));
-        buttons.Controls.Add(CreateDangerButton("删除", OnDeleteMailClicked, 90));
+        buttons.Controls.Add(RegisterOperationButton(CreateButton("刷新收件箱", OnRefreshInboxClicked, 112)));
+        buttons.Controls.Add(RegisterOperationButton(CreateSecondaryButton("阅读", OnReadMailClicked, 90)));
+        buttons.Controls.Add(RegisterOperationButton(CreateDangerButton("删除", OnDeleteMailClicked, 90)));
         layout.Controls.Add(buttons, 0, 0);
 
         ConfigureGrid(inboxGrid);
@@ -454,8 +475,19 @@ public sealed class MainForm : Form
     private void BindEvents()
     {
         Load += OnFormLoaded;
+        mailProviderComboBox.SelectedIndexChanged += OnMailProviderChanged;
         logManager.LogAdded += OnLogAdded;
         logManager.Info("SYSTEM", "Startup", "界面初始化完成");
+    }
+
+    private void OnMailProviderChanged(object? sender, EventArgs e)
+    {
+        if (mailProviderComboBox.SelectedItem is not string provider)
+        {
+            return;
+        }
+
+        ApplyProviderPreset(provider);
     }
 
     private async void OnFormLoaded(object? sender, EventArgs e)
@@ -484,6 +516,9 @@ public sealed class MainForm : Form
             return;
         }
 
+        SetBusy(true);
+        SetStatus("正在保存账号配置...");
+
         try
         {
             await databaseManager.SaveAccountConfigAsync(config);
@@ -494,6 +529,10 @@ public sealed class MainForm : Form
         {
             SetStatus("保存账号配置失败");
             logManager.Error("UI", "SaveConfig", ex.Message);
+        }
+        finally
+        {
+            SetBusy(false);
         }
     }
 
@@ -535,6 +574,7 @@ public sealed class MainForm : Form
 
         SetStatus("正在发送邮件...");
         SmtpSendResult result;
+        SetBusy(true);
 
         try
         {
@@ -561,6 +601,10 @@ public sealed class MainForm : Form
             SetStatus("邮件发送异常");
             logManager.Error("SMTP", "SendMail", ex.Message);
         }
+        finally
+        {
+            SetBusy(false);
+        }
     }
 
     private void OnClearComposeClicked(object? sender, EventArgs e)
@@ -579,6 +623,7 @@ public sealed class MainForm : Form
         }
 
         SetStatus("正在刷新收件箱...");
+        SetBusy(true);
 
         try
         {
@@ -597,6 +642,10 @@ public sealed class MainForm : Form
             SetStatus("刷新收件箱失败");
             logManager.Error("POP3", "RefreshInbox", ex.Message);
         }
+        finally
+        {
+            SetBusy(false);
+        }
     }
 
     private async void OnReadMailClicked(object? sender, EventArgs e)
@@ -607,6 +656,7 @@ public sealed class MainForm : Form
         }
 
         SetStatus("正在读取邮件...");
+        SetBusy(true);
 
         try
         {
@@ -619,6 +669,10 @@ public sealed class MainForm : Form
         {
             SetStatus("读取邮件失败");
             logManager.Error("POP3", "RetrieveMail", ex.Message);
+        }
+        finally
+        {
+            SetBusy(false);
         }
     }
 
@@ -640,6 +694,9 @@ public sealed class MainForm : Form
             return;
         }
 
+        SetBusy(true);
+        SetStatus("正在删除邮件...");
+
         try
         {
             await pop3Client.DeleteMailAsync(mailNo);
@@ -650,6 +707,10 @@ public sealed class MainForm : Form
         {
             SetStatus("删除邮件失败");
             logManager.Error("POP3", "DeleteMail", ex.Message);
+        }
+        finally
+        {
+            SetBusy(false);
         }
     }
 
@@ -765,6 +826,40 @@ public sealed class MainForm : Form
         pop3PortInput.Value = ClampPort(config.Pop3Port);
     }
 
+    private void ApplyProviderPreset(string provider)
+    {
+        switch (provider)
+        {
+            case "QQ邮箱":
+                FillServerConfig("smtp.qq.com", 587, "pop.qq.com", 110);
+                SetStatus("已填充 QQ 邮箱服务器配置");
+                break;
+            case "163邮箱":
+                FillServerConfig("smtp.163.com", 25, "pop.163.com", 110);
+                SetStatus("已填充 163 邮箱服务器配置");
+                break;
+            case "126邮箱":
+                FillServerConfig("smtp.126.com", 25, "pop.126.com", 110);
+                SetStatus("已填充 126 邮箱服务器配置");
+                break;
+            case "Gmail":
+                FillServerConfig("smtp.gmail.com", 587, "pop.gmail.com", 995);
+                SetStatus("已填充 Gmail 服务器配置");
+                break;
+            default:
+                SetStatus("已切换为自定义邮箱配置");
+                break;
+        }
+    }
+
+    private void FillServerConfig(string smtpServer, int smtpPort, string pop3Server, int pop3Port)
+    {
+        smtpServerTextBox.Text = smtpServer;
+        smtpPortInput.Value = ClampPort(smtpPort);
+        pop3ServerTextBox.Text = pop3Server;
+        pop3PortInput.Value = ClampPort(pop3Port);
+    }
+
     private void ShowMailDetail(MailMessageModel mail)
     {
         detailFromTextBox.Text = mail.Sender;
@@ -806,6 +901,7 @@ public sealed class MainForm : Form
     private async Task RunUiActionAsync(string runningMessage, string successMessage, Func<Task> action)
     {
         SetStatus(runningMessage);
+        SetBusy(true);
 
         try
         {
@@ -818,6 +914,10 @@ public sealed class MainForm : Form
             SetStatus("操作失败");
             logManager.Error("UI", "Action", ex.Message);
         }
+        finally
+        {
+            SetBusy(false);
+        }
     }
 
     private void ShowValidationError(string message)
@@ -829,6 +929,22 @@ public sealed class MainForm : Form
     private void SetStatus(string message)
     {
         statusLabel.Text = message;
+    }
+
+    private Button RegisterOperationButton(Button button)
+    {
+        operationButtons.Add(button);
+        return button;
+    }
+
+    private void SetBusy(bool isBusy)
+    {
+        foreach (Button button in operationButtons)
+        {
+            button.Enabled = !isBusy;
+        }
+
+        Cursor = isBusy ? Cursors.WaitCursor : Cursors.Default;
     }
 
     private static GroupBox CreateSectionGroup(string title)
@@ -887,8 +1003,9 @@ public sealed class MainForm : Form
         layout.Controls.Add(new Label
         {
             Text = text,
-            Anchor = AnchorStyles.Left,
-            AutoSize = true,
+            Dock = DockStyle.Fill,
+            AutoSize = false,
+            TextAlign = ContentAlignment.MiddleLeft,
             ForeColor = TextMuted,
             Font = new Font("Microsoft YaHei UI", 9F)
         }, column, row);
@@ -911,6 +1028,19 @@ public sealed class MainForm : Form
         textBox.ForeColor = TextMain;
         textBox.BackColor = Surface;
         textBox.Margin = new Padding(0, 3, 12, 5);
+    }
+
+    private void ConfigureProviderComboBox()
+    {
+        mailProviderComboBox.Dock = DockStyle.Fill;
+        mailProviderComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+        mailProviderComboBox.FlatStyle = FlatStyle.Flat;
+        mailProviderComboBox.ForeColor = TextMain;
+        mailProviderComboBox.BackColor = Surface;
+        mailProviderComboBox.Margin = new Padding(0, 3, 12, 5);
+        mailProviderComboBox.Items.Clear();
+        mailProviderComboBox.Items.AddRange(["自定义", "QQ邮箱", "163邮箱", "126邮箱", "Gmail"]);
+        mailProviderComboBox.SelectedIndex = 0;
     }
 
     private static Button CreateButton(string text, EventHandler handler, int width = 88)

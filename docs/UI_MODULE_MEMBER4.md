@@ -37,6 +37,7 @@ UI/MainForm.cs
 账号配置区位于主窗口顶部，包含：
 
 ```text
+邮箱类型
 邮箱
 授权码
 SMTP服务器
@@ -50,9 +51,12 @@ POP3端口
 
 按钮行为：
 
+- 邮箱类型：选择 QQ邮箱、163邮箱、126邮箱、Gmail 时自动填充 SMTP/POP3 服务器和端口；选择自定义时不覆盖用户输入。
 - 保存配置：调用 `IDatabaseManager.SaveAccountConfigAsync`。
 - 测试 SMTP：调用 `ISmtpClientSocket.ConnectAsync` 和 `QuitAsync`。
 - 测试 POP3：调用 `IPop3ClientSocket.ConnectAsync`、`LoginAsync` 和 `QuitAsync`。
+
+账号、服务器、收件人、主题和正文等输入框已设置 `PlaceholderText`，用于提示用户填写示例。
 
 ### 写邮件页
 
@@ -154,6 +158,22 @@ POP3服务器不能为空
 正文为空时弹出确认提示
 阅读或删除邮件前必须先选择邮件
 ```
+
+## 操作状态控制
+
+为避免重复点击导致多次连接或重复发送，当前界面对以下按钮做了忙碌态控制：
+
+```text
+保存配置
+测试SMTP
+测试POP3
+发送
+刷新收件箱
+阅读
+删除
+```
+
+当异步操作执行时，上述按钮会临时禁用，状态栏显示当前操作进度；操作完成或失败后自动恢复。
 
 ## 编译验证
 
