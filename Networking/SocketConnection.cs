@@ -9,6 +9,8 @@ public sealed class SocketConnection : IDisposable
     private StreamReader? reader;
     private StreamWriter? writer;
 
+    public bool IsConnected => client is not null && client.Connected && reader is not null && writer is not null;
+
     public async Task ConnectAsync(string host, int port, CancellationToken cancellationToken = default)
     {
         client = new TcpClient();
@@ -56,7 +58,7 @@ public sealed class SocketConnection : IDisposable
 
     private void EnsureConnected()
     {
-        if (client is null || !client.Connected || reader is null || writer is null)
+        if (!IsConnected)
         {
             throw new InvalidOperationException("Socket connection has not been established.");
         }
@@ -67,5 +69,8 @@ public sealed class SocketConnection : IDisposable
         writer?.Dispose();
         reader?.Dispose();
         client?.Dispose();
+        writer = null;
+        reader = null;
+        client = null;
     }
 }

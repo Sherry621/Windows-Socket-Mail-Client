@@ -79,8 +79,8 @@ public sealed class MainForm : Form
             Padding = new Padding(14),
             BackColor = AppBackground
         };
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 112));
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 162));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 144));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 190));
         root.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
 
@@ -127,8 +127,8 @@ public sealed class MainForm : Form
             RowCount = 3,
             BackColor = Color.Transparent
         };
-        textLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
-        textLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 24));
+        textLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 48));
+        textLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
         textLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
         Label title = new()
@@ -194,12 +194,15 @@ public sealed class MainForm : Form
             BackColor = Surface
         };
 
-        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 92));
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 110));
         layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
-        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 92));
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 110));
         layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
-        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 92));
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 110));
         layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 34));
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
 
         AddLabel(layout, "邮箱", 0, 0);
         StyleTextBox(emailTextBox);
