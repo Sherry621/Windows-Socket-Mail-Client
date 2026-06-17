@@ -633,6 +633,11 @@ public sealed class MainForm : Form
             IReadOnlyList<MailSummary> mails = await pop3Client.ListMailsAsync();
             await pop3Client.QuitAsync();
 
+            foreach (MailSummary summary in mails)
+            {
+                await databaseManager.SaveMailSummaryAsync(summary);
+            }
+
             inboxBindingSource.DataSource = mails.ToList();
             SetStatus($"收件箱刷新完成，共 {stat.MailCount} 封邮件");
             logManager.Success("POP3", "RefreshInbox", $"邮件数量：{stat.MailCount}，总大小：{stat.TotalSize} 字节");
@@ -730,6 +735,7 @@ public sealed class MainForm : Form
     private void OnLogAdded(object? sender, OperationLogEntry entry)
     {
         string line = $"[{entry.CreateTime:HH:mm:ss}] [{entry.Protocol}] [{entry.Level}] {entry.Operation} - {entry.Content}{Environment.NewLine}";
+        _ = SaveLogEntryAsync(entry);
 
         if (InvokeRequired)
         {
@@ -738,6 +744,18 @@ public sealed class MainForm : Form
         }
 
         logTextBox.AppendText(line);
+    }
+
+    private async Task SaveLogEntryAsync(OperationLogEntry entry)
+    {
+        try
+        {
+            await databaseManager.SaveOperationLogAsync(entry);
+        }
+        catch
+        {
+            // 日志落库失败不应影响界面展示或协议流程。
+        }
     }
 
     private bool TryGetConfig(out AccountConfig config)
