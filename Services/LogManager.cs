@@ -50,12 +50,36 @@ public sealed class LogManager : ILogManager
         {
             Protocol = protocol,
             Operation = operation,
-            Content = content,
+            Content = RedactSensitiveContent(operation, content),
             Level = level,
             CreateTime = DateTimeOffset.Now
         };
 
         entries.Add(entry);
         LogAdded?.Invoke(this, entry);
+    }
+
+    private static string RedactSensitiveContent(string operation, string content)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            return content;
+        }
+
+        string trimmed = content.TrimStart();
+        if (trimmed.StartsWith("PASS ", StringComparison.OrdinalIgnoreCase))
+        {
+            return "PASS <auth code>";
+        }
+
+        if (operation.Contains("Password", StringComparison.OrdinalIgnoreCase)
+            || operation.Contains("AuthCode", StringComparison.OrdinalIgnoreCase)
+            || operation.Contains("授权码", StringComparison.OrdinalIgnoreCase)
+            || operation.Contains("密码", StringComparison.OrdinalIgnoreCase))
+        {
+            return "<sensitive content redacted>";
+        }
+
+        return content;
     }
 }

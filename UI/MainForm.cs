@@ -660,12 +660,21 @@ public sealed class MainForm : Form
             return;
         }
 
+        if (!TryGetConfig(out AccountConfig config))
+        {
+            return;
+        }
+
         SetStatus("正在读取邮件...");
         SetBusy(true);
 
         try
         {
+            await pop3Client.ConnectAsync(config);
+            await pop3Client.LoginAsync(config);
             MailMessageModel mail = await pop3Client.RetrieveMailAsync(mailNo);
+            await pop3Client.QuitAsync();
+
             ShowMailDetail(mail);
             SetStatus($"已读取邮件 #{mailNo}");
             logManager.Success("POP3", "RetrieveMail", $"已读取邮件 #{mailNo}");
@@ -677,6 +686,7 @@ public sealed class MainForm : Form
         }
         finally
         {
+            await ClosePop3SessionQuietlyAsync();
             SetBusy(false);
         }
     }
@@ -684,6 +694,11 @@ public sealed class MainForm : Form
     private async void OnDeleteMailClicked(object? sender, EventArgs e)
     {
         if (!TryGetSelectedMailNo(out int mailNo))
+        {
+            return;
+        }
+
+        if (!TryGetConfig(out AccountConfig config))
         {
             return;
         }
@@ -704,7 +719,11 @@ public sealed class MainForm : Form
 
         try
         {
+            await pop3Client.ConnectAsync(config);
+            await pop3Client.LoginAsync(config);
             await pop3Client.DeleteMailAsync(mailNo);
+            await pop3Client.QuitAsync();
+
             SetStatus($"已发送删除邮件 #{mailNo} 的请求");
             logManager.Success("POP3", "DeleteMail", $"已删除邮件 #{mailNo}");
         }
@@ -715,7 +734,20 @@ public sealed class MainForm : Form
         }
         finally
         {
+            await ClosePop3SessionQuietlyAsync();
             SetBusy(false);
+        }
+    }
+
+    private async Task ClosePop3SessionQuietlyAsync()
+    {
+        try
+        {
+            await pop3Client.QuitAsync();
+        }
+        catch
+        {
+            // POP3 会话收尾失败不应覆盖原始操作结果。
         }
     }
 

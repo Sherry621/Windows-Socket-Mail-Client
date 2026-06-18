@@ -79,9 +79,9 @@ public sealed class MailParser : IMailParser
     public string BuildSmtpContent(MailMessageModel mail)
     {
         StringBuilder builder = new();
-        builder.AppendLine($"From: {mail.Sender}");
-        builder.AppendLine($"To: {mail.Receiver}");
-        builder.AppendLine($"Subject: {EncodeHeader(mail.Subject)}");
+        builder.AppendLine($"From: {SanitizeHeaderValue(mail.Sender)}");
+        builder.AppendLine($"To: {SanitizeHeaderValue(mail.Receiver)}");
+        builder.AppendLine($"Subject: {EncodeHeader(SanitizeHeaderValue(mail.Subject))}");
         builder.AppendLine($"Date: {mail.Date:R}");
         builder.AppendLine("MIME-Version: 1.0");
         builder.AppendLine("Content-Type: text/plain; charset=\"utf-8\"");
@@ -154,8 +154,10 @@ public sealed class MailParser : IMailParser
     {
         if (string.IsNullOrEmpty(value)) return value;
 
+        string normalized = Regex.Replace(value, @"\?=\s+=\?", "?==?");
+
         return Regex.Replace(
-            value,
+            normalized,
             @"=\?([^?]+)\?([BbQq])\?([^?]*)\?=",
             match =>
             {
@@ -425,6 +427,16 @@ public sealed class MailParser : IMailParser
         }
 
         return $"=?utf-8?B?{Convert.ToBase64String(Encoding.UTF8.GetBytes(value))}?=";
+    }
+
+    private static string SanitizeHeaderValue(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return string.Empty;
+        }
+
+        return value.Replace("\r", " ").Replace("\n", " ").Trim();
     }
 
     private static void AppendBase64Body(StringBuilder builder, string body)
